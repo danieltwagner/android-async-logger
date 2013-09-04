@@ -8,6 +8,10 @@ buildscript {
     }
 }
 
+task wrapper(type: Wrapper) {
+    gradleVersion = '1.7'
+}
+
 apply plugin: 'android-library'
 apply plugin: 'maven'
 

@@ -7,7 +7,7 @@ To improve preformance a background thread takes care of all disk operations, an
 
 When instantiating a logger, a path must be specified where log files will be generated. Typically, this will be on the SD card or other external storage. Please remember to grant `android.permission.WRITE_EXTERNAL_STORAGE` permissions to your app.
 
-Log files are named `yyyy-mm-dd-hh-mm-ss-i.log` by default, where date and time are fixed during instantiation, and i increments when `roll()` is called, or the file has grown past a pre-defined size (10MB by default). Rotated files can be gzipped by calling the `gzip()` method.
+Log files are named `yyyy-MM-dd-HH-mm-ss-i.log` by default, where date and time are fixed during instantiation, and i increments when `roll()` is called, or the file has grown past a pre-defined size (10MB by default). Rotated files can be gzipped by calling the `gzip()` method.
 
 Notably, gzipping is done in a way that ensures content is not truncated. The Android implementation of `GzipOutputStream` sometimes silently truncates output files without raising any exceptions, which will lead to data loss if not checked for. This library checks if truncation occurred and repeatedly compresses until successful (or a predefined number of attempts was made).
 

@@ -2,9 +2,8 @@ buildscript {
     repositories {
         mavenCentral()
     }
-
     dependencies {
-        classpath 'com.android.tools.build:gradle:0.5.6'
+        classpath 'com.android.tools.build:gradle:0.5.+'
     }
 }
 
@@ -14,9 +13,7 @@ task wrapper(type: Wrapper) {
 
 apply plugin: 'android-library'
 apply plugin: 'maven'
-
-group = "com.github.danieltwagner"
-version = '0.1'
+apply plugin: 'maven-publish'
 
 repositories {
     mavenCentral()
@@ -36,5 +33,59 @@ android {
         versionName "0.1"
         minSdkVersion 8
         targetSdkVersion 15
+    }
+}
+
+// this generates an apklib to keep Maven users happy
+task apklib(type: Zip) {
+    appendix = extension = 'apklib'
+
+    from 'src/main/AndroidManifest.xml'
+    into('res') {
+        from 'src/main/resources'
+    }
+    into('src') {
+        from 'src/main/java'
+    }
+}
+
+
+group = 'com.github.danieltwagner'
+archivesBaseName = 'android-async-logger'
+version = '0.1.0'
+
+android.libraryVariants // this forces generating libraryVariants tasks up until version 0.5.4 (see http://comments.gmane.org/gmane.comp.handhelds.android.adt.devel/1839)
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+
+            // So I'm not sure why dependencies are not passed along into the POM, but for now this hack does the job...
+            pom.withXml {
+                def dependenciesRoot = asNode().appendNode('dependencies')
+                // read the compile dependencies...
+                def compileConfiguration = project.configurations.getByName("compile")
+                def resolvedConfiguration = compileConfiguration.resolvedConfiguration
+                def resolvedDependencies = resolvedConfiguration.firstLevelModuleDependencies
+                resolvedDependencies.each { dp ->
+                    // ... and generate the XML for each dependency manually
+                    def thisDependency = dependenciesRoot.appendNode('dependency')
+                    thisDependency.appendNode('groupId', dp.moduleGroup)
+                    thisDependency.appendNode('artifactId', dp.moduleName)
+                    thisDependency.appendNode('version', dp.moduleVersion)
+                }
+                return dependenciesRoot
+            }
+
+        	// New maven-publish doesn't quite work with the Gradle Android plugin 0.5.5+ yet. The line below should read:
+        	// artifact bundleRelease
+        	// Before 0.5.5, doing "android.libraryVariants" would generate the libraryVariants tasks on access, which is no longer the case
+        	// This is a known issue, see http://comments.gmane.org/gmane.comp.handhelds.android.adt.devel/1839
+            artifact 'build/libs/' + archivesBaseName + '-' + version + '.aar'
+
+            artifact apklib {
+                classifier 'apklib'
+            }
+        }
     }
 }

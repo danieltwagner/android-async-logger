@@ -25,7 +25,7 @@ public class AsyncLogger {
 	private BlockingQueue<String> storeQ = new LinkedBlockingQueue<String>();
 
     private Context mCtx;
-	private String storageDir;
+	private File storageDir;
     private String filePrefix;
     private int fileNumber = 0;
 	private File currentFile;
@@ -35,11 +35,11 @@ public class AsyncLogger {
 
     /**
 	 * Instantiates a new AsyncLogger and starts persisting to a new file.
-	 * @param path The absolute path of a directory where new files should be placed.
+	 * @param storageDir The absolute path of a directory where new files should be placed.
 	 */
-	public AsyncLogger(Context ctx, String path) {
+	public AsyncLogger(Context ctx, File storageDir) {
         this.mCtx = ctx;
-		this.storageDir = path;
+		this.storageDir = storageDir;
         SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss-");
         filePrefix = df.format(new Date());
 		logWorker.setDaemon(true);
@@ -107,7 +107,7 @@ public class AsyncLogger {
 	    	
 	    	// make sure to do this in the correct order and don't continue if an error occurs, to preserve upload order
 			try {
-				File[] files = getFilesWithSuffix(storageDir, ".log");
+				File[] files = getFilesWithSuffix(storageDir.getAbsolutePath(), ".log");
 	    		for(File f : files) {
 	    			if((currentFile == null) || !f.getAbsolutePath().equals(currentFile.getAbsolutePath())) {
 	    				//Gzip.gzip(f);

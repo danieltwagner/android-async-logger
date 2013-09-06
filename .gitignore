@@ -5,3 +5,5 @@
 .settings
 build
 *.iml
+local.properties
+
